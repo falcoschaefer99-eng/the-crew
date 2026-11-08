@@ -875,6 +875,29 @@ sh install.sh --list             # see what's available
 Or as a Claude Code plugin: `/plugin marketplace add falcoschaefer99-eng/the-crew`,
 then `/plugin install builder-squad@the-crew` or `/plugin install operations-squad@the-crew`.
 
+## Memory
+Every agent keeps a memory file at `~/.claude/agents/memory/<name>/_universal.md`
+and ends its runs with a `MEMORY:` block of new learnings. The harvester
+([`hooks/agent-memory-harvester.py`](hooks/agent-memory-harvester.py)) is a
+`SubagentStop` hook that appends those learnings to the file for **every**
+installed agent: deduped, trimmed to each file's `token_budget`, stdlib only.
+`install.sh` offers to set it up and prints the `settings.json` snippet; it
+never edits your settings for you.
+
+Files by default. Optionally, link a [MUSE Brain](https://github.com/falcoschaefer99-eng/muse-brain)
+so each new learning is also recorded as an observation on the agent's entity:
+
+| Variable | Purpose |
+|---|---|
+| `MUSE_BRAIN_URL` | your brain's MCP endpoint (https). No URL, no network call. |
+| `MUSE_BRAIN_KEY` or `MUSE_BRAIN_KEY_FILE` | bearer key, or a file holding it (never logged) |
+| `MUSE_BRAIN_TENANT` | optional tenant header |
+| `AGENT_MEMORY_AUTOPUSH=1` | optional: commit and push the memory directory to its own git remote |
+
+The file write always wins: brain errors are logged to stderr and never block
+an agent (5 s timeout, at most 10 learnings per run, sent learnings are never
+duplicated).
+
 ## License
 Apache 2.0 (technical capabilities: agent protocols, skills, memory format).
 Each companion as a character (identity, personality, voice, lore, visual
@@ -1033,6 +1056,11 @@ def extras_source_dirs_for(overrides_dir):
 
 EXTRAS_SUBDIRS = ["skills", "references", "hooks", "examples", "docs", "assets"]
 EXTRAS_SKIP_NAMES = {".DS_Store"}
+# The memory harvester ships ONCE, at the crew root (hooks/), generated from
+# the canonical house hook -- not as a stale per-agent copy inside the
+# Michael/Evangeline folders (see write_crew_harvester).
+EXTRAS_SKIP_RELPATHS = {Path("hooks") / "agent-memory-harvester.py"}
+HARVESTER_NAME = "agent-memory-harvester.py"
 
 # GitHub coordinates for the two override-sourced repos, used to build a
 # "see the original file" link for any extras file too large to copy (see
@@ -1103,6 +1131,8 @@ def copy_extras(name, agent_dir, overrides_dir, skipped_log, symlink_log):
             if path.name in EXTRAS_SKIP_NAMES:
                 continue
             rel = path.relative_to(src)
+            if (Path(sub) / rel) in EXTRAS_SKIP_RELPATHS:
+                continue
             size = path.stat().st_size
             if size > MAX_EXTRAS_FILE_BYTES:
                 repo_rel_path = str(Path(sub) / rel)
@@ -1387,6 +1417,11 @@ def generate(output_root, source_dir, portraits_dir, patterns, placeholders, ove
 
     cleanup_stale_output(output_root, builder_rows, operations_rows, removed_log)
 
+    try:
+        write_crew_harvester(output_root, source_dir, patterns)
+    except BuildError as exc:
+        blocked_log.append((HARVESTER_NAME, str(exc)))
+
     write_json(output_root / "plugins" / "builder-squad" / ".claude-plugin" / "plugin.json",
                builder_plugin_manifest(builder_rows))
     write_json(output_root / "plugins" / "operations-squad" / ".claude-plugin" / "plugin.json",
@@ -1399,6 +1434,22 @@ def generate(output_root, source_dir, portraits_dir, patterns, placeholders, ove
     return (builder_rows, operations_rows, scrub_log, rainer_scrub_log, rainer_table_log, private_table_log,
             falco_table_log, falco_scrub_log, section_rewrite_log, skipped_files_log, symlink_log, blocked_log,
             removed_log, missing_portraits)
+
+
+def write_crew_harvester(output_root, source_dir, patterns):
+    """Copy the canonical SubagentStop memory harvester (house copy at
+    <source_dir>/../hooks/) to <output_root>/hooks/, after the same
+    fail-loud house-reference scan every other shipped file gets. Raises
+    BuildError if the source is missing or the scan finds a survivor."""
+    src = source_dir.parent / "hooks" / HARVESTER_NAME
+    if not src.exists():
+        raise BuildError(f"{HARVESTER_NAME}: canonical source not found at {src}")
+    text = src.read_text(encoding="utf-8")
+    fail_loud_scan(text, f"hooks/{HARVESTER_NAME}", patterns)
+    dest = output_root / "hooks" / HARVESTER_NAME
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    dest.write_text(text, encoding="utf-8")
+    dest.chmod(0o755)
 
 
 def dirs_differ(a, b):
@@ -1572,6 +1623,7 @@ def main():
             diffs = []
             diffs += dirs_differ(tmp_root / "builder", REPO_ROOT / "builder")
             diffs += dirs_differ(tmp_root / "operations", REPO_ROOT / "operations")
+            diffs += dirs_differ(tmp_root / "hooks", REPO_ROOT / "hooks")
             diffs += dirs_differ(tmp_root / "plugins", REPO_ROOT / "plugins")
             diffs += dirs_differ(tmp_root / ".claude-plugin", REPO_ROOT / ".claude-plugin")
             if not filecmp.cmp(tmp_root / "README.md", REPO_ROOT / "README.md", shallow=False):

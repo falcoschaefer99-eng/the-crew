@@ -53,6 +53,29 @@ sh install.sh --list             # see what's available
 Or as a Claude Code plugin: `/plugin marketplace add falcoschaefer99-eng/the-crew`,
 then `/plugin install builder-squad@the-crew` or `/plugin install operations-squad@the-crew`.
 
+## Memory
+Every agent keeps a memory file at `~/.claude/agents/memory/<name>/_universal.md`
+and ends its runs with a `MEMORY:` block of new learnings. The harvester
+([`hooks/agent-memory-harvester.py`](hooks/agent-memory-harvester.py)) is a
+`SubagentStop` hook that appends those learnings to the file for **every**
+installed agent: deduped, trimmed to each file's `token_budget`, stdlib only.
+`install.sh` offers to set it up and prints the `settings.json` snippet; it
+never edits your settings for you.
+
+Files by default. Optionally, link a [MUSE Brain](https://github.com/falcoschaefer99-eng/muse-brain)
+so each new learning is also recorded as an observation on the agent's entity:
+
+| Variable | Purpose |
+|---|---|
+| `MUSE_BRAIN_URL` | your brain's MCP endpoint (https). No URL, no network call. |
+| `MUSE_BRAIN_KEY` or `MUSE_BRAIN_KEY_FILE` | bearer key, or a file holding it (never logged) |
+| `MUSE_BRAIN_TENANT` | optional tenant header |
+| `AGENT_MEMORY_AUTOPUSH=1` | optional: commit and push the memory directory to its own git remote |
+
+The file write always wins: brain errors are logged to stderr and never block
+an agent (5 s timeout, at most 10 learnings per run, sent learnings are never
+duplicated).
+
 ## License
 Apache 2.0 (technical capabilities: agent protocols, skills, memory format).
 Each companion as a character (identity, personality, voice, lore, visual

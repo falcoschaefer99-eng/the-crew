@@ -1,5 +1,5 @@
 #!/bin/sh
-# install.sh [--all | --builder | --operations | <name>...] [--force] [--list]
+# install.sh [--all | --builder | --operations | <name>...] [--force] [--no-hook] [--list]
 #
 # Copies <squad>/<name>/agent.md to $CLAUDE_AGENTS_DIR/<name>.md (default
 # ~/.claude/agents/<name>.md). Refuses to overwrite an existing file unless
@@ -8,6 +8,8 @@ set -eu
 
 SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 DEST_DIR="${CLAUDE_AGENTS_DIR:-$HOME/.claude/agents}"
+HOOKS_DIR="${CLAUDE_HOOKS_DIR:-$HOME/.claude/hooks}"
+HARVESTER_SRC="$SCRIPT_DIR/hooks/agent-memory-harvester.py"
 
 # Squad -> space-separated list of agent names that actually have a
 # generated builder/<name>/ or operations/<name>/ directory. Scans the
@@ -92,14 +94,61 @@ install_one() {
     echo "installed: $name -> $dest"
 }
 
+# Offer the memory harvester (a SubagentStop hook that appends every agent's
+# MEMORY: block to its memory file). Never edits settings.json: copies the
+# script only if you say yes, then prints the snippet for you to paste.
+offer_harvester() {
+    [ -f "$HARVESTER_SRC" ] || return 0
+    hook_path="$HARVESTER_SRC"
+    echo ""
+    echo "Memory harvester (optional): without it, agents' MEMORY: blocks are not saved to their memory files."
+    if [ -t 0 ] && [ -t 1 ]; then
+        printf 'Copy it to %s/agent-memory-harvester.py? [y/N] ' "$HOOKS_DIR"
+        read -r answer || answer=""
+        case "$answer" in
+            y|Y|yes|YES)
+                dest_hook="$HOOKS_DIR/agent-memory-harvester.py"
+                if [ -e "$dest_hook" ] && ! cmp -s "$HARVESTER_SRC" "$dest_hook"; then
+                    echo "skip copy: $dest_hook already exists and differs (not overwriting)"
+                else
+                    mkdir -p "$HOOKS_DIR"
+                    cp "$HARVESTER_SRC" "$dest_hook"
+                    chmod 755 "$dest_hook"
+                    hook_path="$dest_hook"
+                    echo "copied: $dest_hook"
+                fi
+                ;;
+        esac
+    fi
+    echo "To enable, add this to the \"hooks\" object in ~/.claude/settings.json (merge with any existing SubagentStop entry):"
+    cat <<EOF
+
+    "SubagentStop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          { "type": "command", "command": "python3 $hook_path", "timeout": 20 }
+        ]
+      }
+    ]
+
+Optional MUSE Brain link: set MUSE_BRAIN_URL plus MUSE_BRAIN_KEY (or MUSE_BRAIN_KEY_FILE)
+in the "env" object of the same file. See the README, Memory section.
+EOF
+}
+
 force=0
 names=""
 mode=""
+install_hook=1
 
 for arg in "$@"; do
     case "$arg" in
         --force)
             force=1
+            ;;
+        --no-hook)
+            install_hook=0
             ;;
         --list)
             print_list
@@ -139,7 +188,7 @@ esac
 names=$(echo "$names" | tr -s ' \n' ' ')
 
 if [ -z "$(echo "$names" | tr -d ' ')" ]; then
-    echo "usage: install.sh [--all | --builder | --operations | <name>...] [--force]" >&2
+    echo "usage: install.sh [--all | --builder | --operations | <name>...] [--force] [--no-hook]" >&2
     echo "       install.sh --list" >&2
     exit 1
 fi
@@ -148,5 +197,9 @@ status=0
 for name in $names; do
     install_one "$name" "$force" || status=1
 done
+
+if [ "$install_hook" = "1" ]; then
+    offer_harvester
+fi
 
 exit $status
