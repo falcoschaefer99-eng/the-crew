@@ -72,6 +72,7 @@ unprotected when a guard file goes missing is worse than one that stops.
 import argparse
 import filecmp
 import json
+import os
 import re
 import shutil
 import sys
@@ -81,7 +82,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SOURCE_URL = "https://github.com/falcoschaefer99-eng/the-crew"
 DEFAULT_SOURCE_DIR = Path.home() / ".claude" / "agents"
-DEFAULT_PORTRAITS_DIR = Path.home() / "AI" / "funkatorium-web" / "_deploy" / "images" / "crew"
+DEFAULT_PORTRAITS_DIR = Path(os.environ["CREW_PORTRAITS_DIR"]) if os.environ.get("CREW_PORTRAITS_DIR") else Path("portraits")
 DEFAULT_PRIVATE_NAMES_FILE = Path.home() / ".claude" / "the-crew-private-names.txt"
 DEFAULT_HOUSE_PATTERNS_FILE = Path.home() / ".claude" / "the-crew-house-patterns.txt"
 DEFAULT_PLACEHOLDERS_FILE = Path.home() / ".claude" / "the-crew-placeholders.txt"
