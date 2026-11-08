@@ -840,6 +840,8 @@ def render_root_readme(builder_rows, operations_rows):
 
     return f"""# the-crew
 
+![The crew](assets/crew-collage.jpg)
+
 The Funkatorium's builder and operations agents — specialized Claude Code
 subagents, each with a defined role, a persistent memory file, and a lane
 they stay in. Full roster, live: read, plan, implement, review, deploy,
