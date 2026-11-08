@@ -1,0 +1,12 @@
+{
+  "name": "operations-squad",
+  "displayName": "Operations Squad",
+  "description": "Six Operations Squad agents: hygiene, comms, positioning, SEO, security, legal. Skills and hooks: see the repo folder \u2014 plugins ship agents only. (technical content Apache-2.0; character identity reserved \u2014 see NOTICE)",
+  "version": "0.2.0",
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/falcoschaefer99-eng/the-crew",
+  "repository": "https://github.com/falcoschaefer99-eng/the-crew",
+  "author": {
+    "name": "The Funkatorium"
+  }
+}

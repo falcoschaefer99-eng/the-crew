@@ -1,0 +1,22 @@
+{
+  "name": "the-crew",
+  "owner": {
+    "name": "The Funkatorium",
+    "url": "https://github.com/falcoschaefer99-eng"
+  },
+  "description": "The Funkatorium's builder and operations agents for Claude Code.",
+  "plugins": [
+    {
+      "name": "builder-squad",
+      "source": "./plugins/builder-squad",
+      "description": "Eleven Builder Squad agents: architecture, implementation, review, and deploy. (technical content Apache-2.0; character identity reserved \u2014 see NOTICE)",
+      "license": "Apache-2.0"
+    },
+    {
+      "name": "operations-squad",
+      "source": "./plugins/operations-squad",
+      "description": "Six Operations Squad agents: hygiene, comms, positioning, SEO, security, legal. (technical content Apache-2.0; character identity reserved \u2014 see NOTICE)",
+      "license": "Apache-2.0"
+    }
+  ]
+}
