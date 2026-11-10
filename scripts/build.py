@@ -1683,8 +1683,16 @@ def main():
     patterns = build_fail_loud_patterns(private_names, house_patterns)
 
     if args.check:
-        with tempfile.TemporaryDirectory() as tmp:
+        with tempfile.TemporaryDirectory() as tmp, tempfile.TemporaryDirectory() as tmp_portraits:
             tmp_root = Path(tmp)
+            if not portraits_dir.is_dir() or not any(portraits_dir.glob("*.jpg")):
+                # No usable --portraits-dir: compare against the portraits
+                # already committed, so a missing portrait source is not
+                # reported as drift in the READMEs, the jpgs, or crew.json.
+                for committed in list(REPO_ROOT.glob("builder/*/*.jpg")) + list(REPO_ROOT.glob("operations/*/*.jpg")):
+                    shutil.copyfile(committed, Path(tmp_portraits) / committed.name)
+                portraits_dir = Path(tmp_portraits)
+                print("check: no --portraits-dir given; using portraits committed in the repo", file=sys.stderr)
             try:
                 (builder_rows, operations_rows, scrub_log, rainer_scrub_log, rainer_table_log, private_table_log,
                  falco_table_log, falco_scrub_log, section_rewrite_log, skipped_files_log, symlink_log, blocked_log,
