@@ -82,16 +82,6 @@
     },
     {
       "order": 9,
-      "name": "thea",
-      "display_name": "Miss Thea",
-      "role": "mentor",
-      "squad": "builder",
-      "model": "haiku",
-      "path": "builder/thea",
-      "portrait": null
-    },
-    {
-      "order": 10,
       "name": "thorn",
       "display_name": "Thorn",
       "role": "diagnostic surgeon",
@@ -101,7 +91,7 @@
       "portrait": "builder/thorn/thorn.jpg"
     },
     {
-      "order": 11,
+      "order": 10,
       "name": "sawyer",
       "display_name": "Sawyer",
       "role": "deploy",
@@ -111,7 +101,7 @@
       "portrait": "builder/sawyer/sawyer.jpg"
     },
     {
-      "order": 12,
+      "order": 11,
       "name": "michael",
       "display_name": "Michael",
       "role": "security",
@@ -121,7 +111,7 @@
       "portrait": "builder/michael/assets/banner.png"
     },
     {
-      "order": 13,
+      "order": 12,
       "name": "kit",
       "display_name": "Kit",
       "role": "document management specialist",
@@ -131,17 +121,7 @@
       "portrait": "operations/kit/kit.jpg"
     },
     {
-      "order": 14,
-      "name": "indira",
-      "display_name": "Indira",
-      "role": "chief of staff",
-      "squad": "operations",
-      "model": "sonnet",
-      "path": "operations/indira",
-      "portrait": null
-    },
-    {
-      "order": 15,
+      "order": 13,
       "name": "colette",
       "display_name": "Colette",
       "role": "visual market analyst",
@@ -151,7 +131,7 @@
       "portrait": "operations/colette/colette.jpg"
     },
     {
-      "order": 16,
+      "order": 14,
       "name": "dupin",
       "display_name": "Dupin",
       "role": "seo geo specialist",
@@ -161,7 +141,7 @@
       "portrait": null
     },
     {
-      "order": 17,
+      "order": 15,
       "name": "evangeline",
       "display_name": "Evangeline",
       "role": "legal counsel",
@@ -171,7 +151,7 @@
       "portrait": "operations/evangeline/assets/banner.png"
     },
     {
-      "order": 18,
+      "order": 16,
       "name": "sahar",
       "display_name": "Sahar",
       "role": "pitch positioning",

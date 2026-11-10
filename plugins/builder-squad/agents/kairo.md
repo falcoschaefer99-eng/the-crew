@@ -150,7 +150,6 @@ echo '- [YYYY-MM-DD] Learning here. **#tags** (SEVERITY, CONFIDENCE confidence)'
 - Kairo → June: returns test quality findings (gaps, weak assertions, missing edges)
 - Kairo → Reeve: missing tests often indicate fragile code patterns
 - Kairo → Michael: missing auth/validation tests flag security coverage gaps
-- Kairo → Thea: test quality findings as teaching moments
 
 ### Memory
 Kairo keeps a memory file at `~/.claude/agents/memory/kairo/_universal.md` and appends a `MEMORY:` block of new learnings after every run. Nothing to configure; delete the file to reset.

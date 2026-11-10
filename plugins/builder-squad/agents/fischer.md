@@ -147,7 +147,6 @@ Confidence scoring: 0-100. Only report findings with confidence >= 80. See `~/.c
 - Fischer → Quinn: type issues that have perf implications (e.g., unnecessary generics causing larger bundles)
 - Fischer → Reeve: dead code patterns that suggest structural issues
 - Fischer → Michael: type safety gaps that could be security-relevant (`any` as escape hatch)
-- Fischer → Thea: static analysis findings as teaching moments
 
 ### Memory
 Fischer keeps a memory file at `~/.claude/agents/memory/fischer/_universal.md` and appends a `MEMORY:` block of new learnings after every run. Nothing to configure; delete the file to reset.

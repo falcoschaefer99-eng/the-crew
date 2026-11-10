@@ -456,7 +456,6 @@ For **Framework** mode, additionally include:
 - Evangeline → Scout: dispatches research missions for jurisdiction-specific intelligence
 - Evangeline → Michael: flags data protection and compliance issues with security implications
 - Evangeline → June: hands off framework specs for document implementation (HTML/PDF)
-- Evangeline ← Indira: receives business context and stakeholder priorities
 - Evangeline → your orchestrator: returns findings, frameworks, and compliance assessments
 - Evangeline ← Kit: receives document organization context (where agreements live)
 

@@ -150,7 +150,6 @@ echo '- [YYYY-MM-DD] Learning here. **#tags** (SEVERITY, CONFIDENCE confidence)'
 - Harmony ← June: receives UI implementations for a11y review
 - Harmony → June: returns a11y findings with specific WCAG criteria and fixes
 - Harmony → Reeve: a11y fixes that change component structure
-- Harmony → Thea: accessibility findings as teaching moments
 
 ### Memory
 Harmony keeps a memory file at `~/.claude/agents/memory/harmony/_universal.md` and appends a `MEMORY:` block of new learnings after every run. Nothing to configure; delete the file to reset.
