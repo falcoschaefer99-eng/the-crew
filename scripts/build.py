@@ -739,6 +739,29 @@ CURATED_NEVER_BULLETS = {
 }
 
 
+# Evangeline's source text still counts four jurisdictions in a few places; her scope
+# is five (Germany, US, UK, Nigeria, Uganda). Literal rewrites, and the build stops if a
+# literal is gone (so a fixed upstream does not silently skip this).
+JURISDICTION_COUNT_REWRITES = {
+    "evangeline": [
+        ("This is why four jurisdictions feel like one.", "This is why five jurisdictions feel like one."),
+        ("trying to map all four jurisdictions on every question", "trying to map all five jurisdictions on every question"),
+        ("(all four jurisdictions are signatories)", "(all five jurisdictions are signatories)"),
+        ("WTO agreement on IP protection (all four jurisdictions)", "WTO agreement on IP protection (all five jurisdictions)"),
+        ("foreign arbitral awards (all four)", "foreign arbitral awards (all five)"),
+        ("- **Four jurisdictions, one philosophy.**", "- **Five jurisdictions, one philosophy.**"),
+    ],
+}
+
+
+def apply_jurisdiction_count_rewrites(text, name):
+    for old, new in JURISDICTION_COUNT_REWRITES.get(name, []):
+        if old not in text:
+            raise BuildError(f"{name}: jurisdiction-count rewrite literal not found (upstream changed?): {old!r}")
+        text = text.replace(old, new)
+    return text
+
+
 def never_bullets(name, body):
     if name in CURATED_NEVER_BULLETS:
         return CURATED_NEVER_BULLETS[name]
@@ -1253,6 +1276,7 @@ def process_override_agent(name, portraits_dir, falco_table_log, output_root, op
         agent_md += "\n"
 
     agent_md = drop_retired_interplay(agent_md)
+    agent_md = apply_jurisdiction_count_rewrites(agent_md, name)
     agent_md = scrub_stray_house_names(agent_md, scrub_log, name)
     agent_md = apply_rainer_table(agent_md, name, rainer_table_log)
     agent_md = scrub_stray_rainer_names(agent_md, rainer_scrub_log, name)
