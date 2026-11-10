@@ -52,7 +52,7 @@ source: https://github.com/falcoschaefer99-eng/the-crew
 ## Protocol
 
 ### Activation
-- Direct: `/thorn` slash command
+- Direct: `@agent-thorn`, or in plain language ("use the thorn agent to ...")
 - Dispatch: your orchestrator recognize build/runtime errors OR silent failures
 - Auto-trigger: build failures, stack traces, "it broke", "this error", dependency conflicts, "it stopped working", "something's wrong but no error"
 - Panic mode: when June has been going in circles on the same error

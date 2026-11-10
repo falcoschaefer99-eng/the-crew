@@ -12,6 +12,7 @@ source_overrides_for), applies the mechanical transform below, and writes:
   - plugins/{builder,operations}-squad/agents/<name>.md (copy of agent.md)
   - plugins/{builder,operations}-squad/.claude-plugin/plugin.json
   - .claude-plugin/marketplace.json
+  - crew.json (machine-readable roster)
   - README.md (root, tables regenerated from frontmatter)
 
 Idempotent: re-running with unchanged sources produces no diff. Never hand-
@@ -25,7 +26,7 @@ THE TRANSFORM, in order:
    of actual squad -- the builder/operations split is a the-crew-only
    packaging decision, not a house concept, so we don't trust the source
    value). Add license: Apache-2.0, license_scope, and source: <repo url>.
-2. `- Dispatch: Rook recognizes <X>` -> `- Dispatch: invoke with /<name>, or
+2. `- Dispatch: Rook recognizes <X>` -> `- Dispatch: invoke with `@agent-<name>`, or
    let your orchestrator dispatch on <X>`.
 3. `### Brain Entity Integration` (to EOF or next heading) -> `### Memory`,
    built from the same "What X remembers" / "How ... works" bullet lists,
@@ -265,8 +266,21 @@ DISPATCH_RE = re.compile(r"^- Dispatch: Rook recognizes (.+)$", re.MULTILINE)
 
 def transform_dispatch(body, name):
     def repl(m):
-        return f"- Dispatch: invoke with /{name}, or let your orchestrator dispatch on {m.group(1)}"
+        return f"- Dispatch: invoke with `@agent-{name}`, or let your orchestrator dispatch on {m.group(1)}"
     return DISPATCH_RE.subn(repl, body)[0]
+
+
+# Claude Code subagents are not slash commands: they are called with an
+# @-mention (`@agent-<name>`) or in plain language. The house defs say
+# "`/<name>` slash command" (they are also house slash commands), which is
+# wrong for anyone installing from this repo.
+DIRECT_RE = re.compile(r"^- Direct: `/([A-Za-z0-9_-]+)` slash command[ \t]*$", re.MULTILINE)
+
+
+def transform_direct(body, name):
+    def repl(m):
+        return f'- Direct: `@agent-{name}`, or in plain language ("use the {name} agent to ...")'
+    return DIRECT_RE.sub(repl, body)
 
 
 def scrub_stray_house_names(text, scrub_log, source_name):
@@ -952,6 +966,26 @@ def marketplace_manifest(builder_rows, operations_rows):
     }
 
 
+def crew_manifest(builder_rows, operations_rows):
+    """Machine-readable roster for the website and other consumers, in
+    README order (Builder Squad, then Operations Squad). Built only from the
+    shipped rows -- nothing here is read from a private source."""
+    agents = []
+    for r in list(builder_rows) + list(operations_rows):
+        rel = r.get("portrait_rel")
+        agents.append({
+            "order": len(agents) + 1,
+            "name": r["name"],
+            "display_name": r["display_name"],
+            "role": humanize_role(r["role"]),
+            "squad": r["squad"],
+            "model": r["model"],
+            "path": f"{r['squad']}/{r['name']}",
+            "portrait": f"{r['squad']}/{r['name']}/{rel}" if rel else None,
+        })
+    return {"agents": agents}
+
+
 def write_json(path, data):
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
@@ -1207,7 +1241,7 @@ def process_override_agent(name, portraits_dir, falco_table_log, output_root, op
     description_text = folded_text(by_key["description"])
 
     new_frontmatter = build_frontmatter(fields, team_for(name, operations_live))
-    agent_md = new_frontmatter + "\n" + body
+    agent_md = new_frontmatter + "\n" + transform_direct(body, name)
     if not agent_md.endswith("\n"):
         agent_md += "\n"
 
@@ -1251,7 +1285,8 @@ def process_override_agent(name, portraits_dir, falco_table_log, output_root, op
     plugin_agents_dir.mkdir(parents=True, exist_ok=True)
     (plugin_agents_dir / f"{name}.md").write_text(agent_md, encoding="utf-8")
 
-    return {"name": name, "display_name": display_name, "role": role, "model": model, "squad": squad}
+    return {"name": name, "display_name": display_name, "role": role, "model": model, "squad": squad,
+            "portrait_rel": portrait_rel}
 
 
 # ---------------------------------------------------------------------------
@@ -1280,7 +1315,7 @@ def process_agent(name, source_dir, portraits_dir, scrub_log, missing_portraits,
 
     squad = "operations" if name in operations_live else "builder"
     new_frontmatter = build_frontmatter(fields, squad)
-    new_body = transform_dispatch(body, name)
+    new_body = transform_direct(transform_dispatch(body, name), name)
     if name not in NO_MEMORY_SECTION_AGENTS:
         new_body = transform_memory_section(new_body, name, display_name)
 
@@ -1339,7 +1374,8 @@ def process_agent(name, source_dir, portraits_dir, scrub_log, missing_portraits,
     plugin_agents_dir.mkdir(parents=True, exist_ok=True)
     (plugin_agents_dir / f"{name}.md").write_text(agent_md, encoding="utf-8")
 
-    return {"name": name, "display_name": display_name, "role": role, "model": model, "squad": squad}
+    return {"name": name, "display_name": display_name, "role": role, "model": model, "squad": squad,
+            "portrait_rel": portrait_rel}
 
 
 def cleanup_stale_output(output_root, builder_rows, operations_rows, removed_log):
@@ -1455,6 +1491,8 @@ def generate(output_root, source_dir, portraits_dir, patterns, placeholders, ove
     write_json(output_root / "plugins" / "operations-squad" / ".claude-plugin" / "plugin.json",
                operations_plugin_manifest(operations_rows))
     write_json(output_root / ".claude-plugin" / "marketplace.json", marketplace_manifest(builder_rows, operations_rows))
+
+    write_json(output_root / "crew.json", crew_manifest(builder_rows, operations_rows))
 
     readme = render_root_readme(builder_rows, operations_rows)
     (output_root / "README.md").write_text(readme, encoding="utf-8")
@@ -1667,6 +1705,8 @@ def main():
             diffs += dirs_differ(tmp_root / ".claude-plugin", REPO_ROOT / ".claude-plugin")
             if not filecmp.cmp(tmp_root / "README.md", REPO_ROOT / "README.md", shallow=False):
                 diffs.append("differs: README.md")
+            if not (REPO_ROOT / "crew.json").exists() or not filecmp.cmp(tmp_root / "crew.json", REPO_ROOT / "crew.json", shallow=False):
+                diffs.append("differs: crew.json")
 
             if diffs:
                 print("DRIFT DETECTED (tree does not match a fresh generation from source):", file=sys.stderr)

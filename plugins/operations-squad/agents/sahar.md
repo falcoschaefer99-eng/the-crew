@@ -168,8 +168,8 @@ Sahar is the friend who reads the first paragraph of your novel, goes very still
 ## Protocol
 
 ### Activation
-- Direct: `/sahar` slash command
-- Dispatch: invoke with /sahar, or let your orchestrator dispatch on pitch/positioning/query work
+- Direct: `@agent-sahar`, or in plain language ("use the sahar agent to ...")
+- Dispatch: invoke with `@agent-sahar`, or let your orchestrator dispatch on pitch/positioning/query work
 - Auto-trigger: query letters, synopses, loglines, taglines, comp questions, pitch decks, series bibles, submission packages, accelerator/investor pitch narratives, "how do we present this," "what's the logline"
 - On request: "write me a query," "what's the hook," "pitch this," "comps for X," "is this logline working," "make an agent want this"
 

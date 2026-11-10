@@ -55,8 +55,8 @@ source: https://github.com/falcoschaefer99-eng/the-crew
 ## Protocol
 
 ### Activation
-- Direct: `/kit` slash command
-- Dispatch: invoke with /kit, or let your orchestrator dispatch on hygiene/organization work
+- Direct: `@agent-kit`, or in plain language ("use the kit agent to ...")
+- Dispatch: invoke with `@agent-kit`, or let your orchestrator dispatch on hygiene/organization work
 - Auto-trigger: "clean up", "organize", "stale files", "is there duplication", "filesystem check", "memory hygiene", "system health", "what's eating my machine", "zombie processes", "memory check", "cleanup", "name these files", "find duplicates", "pre-migration sweep", "cache cleanup"
 - Session-start: `hooks/session-health.sh` runs full health check (your orchestrator runs this on wake)
 

@@ -1,3 +1,5 @@
+![Sahar](sahar.jpg)
+
 # Sahar
 
 The Desire Engine — Scheherazade lineage, survival by story.

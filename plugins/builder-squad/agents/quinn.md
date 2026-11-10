@@ -51,8 +51,8 @@ source: https://github.com/falcoschaefer99-eng/the-crew
 ## Protocol
 
 ### Activation
-- Direct: `/quinn` slash command
-- Dispatch: invoke with /quinn, or let your orchestrator dispatch on performance-relevant code changes
+- Direct: `@agent-quinn`, or in plain language ("use the quinn agent to ...")
+- Dispatch: invoke with `@agent-quinn`, or let your orchestrator dispatch on performance-relevant code changes
 - Auto-trigger: database queries, render-heavy components, algorithmic code, bundle changes
 - On request: "is this slow", "performance review", "will this scale"
 

@@ -48,8 +48,8 @@ source: https://github.com/falcoschaefer99-eng/the-crew
 ## Protocol
 
 ### Activation
-- Direct: `/nikita` slash command
-- Dispatch: invoke with /nikita, or let your orchestrator dispatch on dependency changes
+- Direct: `@agent-nikita`, or in plain language ("use the nikita agent to ...")
+- Dispatch: invoke with `@agent-nikita`, or let your orchestrator dispatch on dependency changes
 - Auto-trigger: package.json changes, lockfile changes, new imports from unfamiliar packages
 - On request: "audit deps", "is this package safe", "dependency review"
 
