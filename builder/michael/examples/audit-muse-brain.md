@@ -7,7 +7,7 @@
 ---
 
 ## Review: Michael -- Security
-**Files reviewed:** All 44 source files under `rook-brain/src/`, plus `wrangler.jsonc`, `package.json`, `.gitignore`, `.env.example`
+**Files reviewed:** All 44 source files under `src/`, plus `wrangler.jsonc`, `package.json`, `.gitignore`, `.env.example`
 **Mode:** Deep Review (STRIDE + Full 11-Category Checklist + OWASP Agentic AI Top 10)
 **Verdict:** PASS WITH NOTES
 

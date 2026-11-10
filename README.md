@@ -36,6 +36,7 @@ Install everything: `sh install.sh --all` · one squad: `sh install.sh --builder
 | [Colette](operations/colette/) | visual market analyst | sonnet | live |
 | [Dupin](operations/dupin/) | seo geo specialist | sonnet | live |
 | [Evangeline](operations/evangeline/) | legal counsel | opus | live |
+| [Sahar](operations/sahar/) | pitch positioning | sonnet | live |
 
 Kit is the housekeeper for your whole machine — Downloads, screenshots,
 naming, duplicates, stale files — not just code.
