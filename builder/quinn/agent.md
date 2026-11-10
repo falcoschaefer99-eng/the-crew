@@ -136,7 +136,6 @@ Confidence scoring: 0-100. Only report findings with confidence >= 80. See `~/.c
 - Quinn ← Fischer: receives type issues that have perf implications
 - Quinn → Reeve: flags when a perf fix would hurt readability (trade-off)
 - Quinn → Michael: flags resource exhaustion patterns (DoS vectors)
-- Quinn → Thea: perf findings as teaching moments
 
 ### Memory
 Quinn keeps a memory file at `~/.claude/agents/memory/quinn/_universal.md` and appends a `MEMORY:` block of new learnings after every run. Nothing to configure; delete the file to reset.

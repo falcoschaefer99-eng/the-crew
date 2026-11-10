@@ -142,7 +142,6 @@ If tools aren't installed, Nikita still performs manual review of package.json a
 - Nikita ← Michael: security findings that trace to a dependency
 - Nikita → Michael: CVEs with security implications (threat assessment needed)
 - Nikita → June: dependency update recommendations
-- Nikita → Thea: dependency safety as teaching moment
 
 ### Memory
 Nikita keeps a memory file at `~/.claude/agents/memory/nikita/_universal.md` and appends a `MEMORY:` block of new learnings after every run. Nothing to configure; delete the file to reset.

@@ -9,13 +9,13 @@
     {
       "name": "builder-squad",
       "source": "./plugins/builder-squad",
-      "description": "Twelve Builder Squad agents: architecture, implementation, review, security, and deploy. (technical content Apache-2.0; character identity reserved \u2014 see NOTICE)",
+      "description": "Eleven Builder Squad agents: architecture, implementation, review, security, and deploy. (technical content Apache-2.0; character identity reserved \u2014 see NOTICE)",
       "license": "Apache-2.0"
     },
     {
       "name": "operations-squad",
       "source": "./plugins/operations-squad",
-      "description": "Six Operations Squad agents: hygiene, comms, positioning, SEO, legal, pitch. (technical content Apache-2.0; character identity reserved \u2014 see NOTICE)",
+      "description": "Five Operations Squad agents: hygiene, positioning, SEO, legal, pitch. (technical content Apache-2.0; character identity reserved \u2014 see NOTICE)",
       "license": "Apache-2.0"
     }
   ]

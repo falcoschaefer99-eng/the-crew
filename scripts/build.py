@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""the-crew generator: regenerates this repo's full roster (twelve Builder
-Squad + six Operations Squad agents) from ~/.claude/agents, plus two
+"""the-crew generator: regenerates this repo's full roster (eleven Builder
+Squad + five Operations Squad agents) from ~/.claude/agents, plus two
 per-agent source overrides read from Michael's and Evangeline's own public
 release repos. Not a generic transform tool -- BUILDER_LIVE/OPERATIONS_LIVE
 below are hardcoded lists of names, not config; add an agent by adding it
@@ -91,9 +91,9 @@ DEFAULT_PLACEHOLDERS_FILE = Path.home() / ".claude" / "the-crew-placeholders.txt
 # Full Wave 2 roster. Both squads are entirely live -- no "coming" rows.
 BUILDER_LIVE = [
     "eli", "june", "reeve", "quinn", "kairo", "nikita", "harmony", "fischer",
-    "thea", "thorn", "sawyer", "michael",
+    "thorn", "sawyer", "michael",
 ]
-OPERATIONS_LIVE = ["kit", "indira", "colette", "dupin", "evangeline", "sahar"]
+OPERATIONS_LIVE = ["kit", "colette", "dupin", "evangeline", "sahar"]
 
 FRONTMATTER_KEEP_ORDER = [
     "name", "display_name", "role", "team", "description",
@@ -283,6 +283,21 @@ def transform_direct(body, name):
     return DIRECT_RE.sub(repl, body)
 
 
+# Agents retired from the public crew (kept private). Interplay bullets in
+# shipped agents that point at them are dropped so no definition references an
+# agent the repo does not ship.
+RETIRED_AGENTS = ("Thea", "Indira")
+RETIRED_INTERPLAY_RE = re.compile(
+    r"^- [^\n]*(?:←|→|↔|<-|->)\s*(?:" + "|".join(RETIRED_AGENTS) + r")\b[^\n]*\n|"
+    r"^- (?:" + "|".join(RETIRED_AGENTS) + r")\s*(?:←|→|↔|<-|->)[^\n]*\n",
+    re.MULTILINE,
+)
+
+
+def drop_retired_interplay(text):
+    return RETIRED_INTERPLAY_RE.sub("", text)
+
+
 def scrub_stray_house_names(text, scrub_log, source_name):
     """See module docstring, JUNE'S ADDITION. Runs after transform_dispatch
     and the Memory-section rebuild, on the FULLY ASSEMBLED agent_md
@@ -469,7 +484,7 @@ def transform_memory_section(body, name, display_name):
 
 def fail_loud_scan(text, source_label, patterns):
     """Reports EVERY matching line, not just the first -- a scan that stops
-    at the first hit can hide a second violation behind it (indira.md's
+    at the first hit can hide a second violation behind it (a source file's
     second bare Rainer mention, two passes back). One BuildError per call,
     its message holding one "file:line: matched [label] -> line" entry per
     line, so a caller that just prints the exception still sees everything
@@ -701,17 +716,9 @@ CURATED_NEVER_BULLETS = {
         "Write, edit, or create files — read-only, always.",
         "Hold an opinion on code style beyond what the linter enforces.",
     ],
-    "thea": [
-        "Write code, create files, or edit anything — read-only, always.",
-        "Repeat a teaching moment the learner has already mastered — she checks learner state first.",
-    ],
     "kit": [
         "Delete anything without asking — even in SAFE ZONES, Kit renames and moves; deletion always needs explicit approval.",
         "Commit changes to git — Kit reports what changed in a git-tracked directory; the user decides when to commit.",
-    ],
-    "indira": [
-        "Take action on the user's behalf — she reads and summarizes, never sends messages, creates events, or modifies tasks.",
-        "Prioritize for the user — she presents information clearly so the user can decide.",
     ],
     "colette": [
         "Ship copy or code — she directs the visual argument; she has no Write/Edit tools and Bash is removed too.",
@@ -898,7 +905,7 @@ LICENSE_CARVE_OUT = " (technical content Apache-2.0; character identity reserved
 # from a given run; the manifest must never claim a capability (e.g.
 # "legal") that isn't actually in the shipped agents/ folder.
 OPERATIONS_DOMAIN_WORDS = {
-    "kit": "hygiene", "indira": "comms", "colette": "positioning",
+    "kit": "hygiene", "colette": "positioning",
     "dupin": "SEO", "evangeline": "legal", "sahar": "pitch",
 }
 
@@ -1245,6 +1252,7 @@ def process_override_agent(name, portraits_dir, falco_table_log, output_root, op
     if not agent_md.endswith("\n"):
         agent_md += "\n"
 
+    agent_md = drop_retired_interplay(agent_md)
     agent_md = scrub_stray_house_names(agent_md, scrub_log, name)
     agent_md = apply_rainer_table(agent_md, name, rainer_table_log)
     agent_md = scrub_stray_rainer_names(agent_md, rainer_scrub_log, name)
@@ -1335,6 +1343,7 @@ def process_agent(name, source_dir, portraits_dir, scrub_log, missing_portraits,
     # Name-generalization passes run on the FULLY ASSEMBLED agent_md, not
     # body alone -- see scrub_stray_house_names' docstring for why (a
     # source's frontmatter `description` can carry a house name too).
+    agent_md = drop_retired_interplay(agent_md)
     agent_md = scrub_stray_house_names(agent_md, scrub_log, name)
     agent_md = apply_rainer_table(agent_md, name, rainer_table_log if rainer_table_log is not None else [])
     agent_md = scrub_stray_rainer_names(agent_md, rainer_scrub_log if rainer_scrub_log is not None else [], name)
