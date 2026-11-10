@@ -26,6 +26,7 @@ Install everything: `sh install.sh --all` · one squad: `sh install.sh --builder
 | [Miss Thea](builder/thea/) | mentor | haiku | live |
 | [Thorn](builder/thorn/) | diagnostic surgeon | sonnet | live |
 | [Sawyer](builder/sawyer/) | deploy | haiku | live |
+| [Michael](builder/michael/) | security | opus | live |
 
 ## Operations Squad
 | Agent | Role | Model | Status |
@@ -34,8 +35,8 @@ Install everything: `sh install.sh --all` · one squad: `sh install.sh --builder
 | [Indira](operations/indira/) | chief of staff | sonnet | live |
 | [Colette](operations/colette/) | visual market analyst | sonnet | live |
 | [Dupin](operations/dupin/) | seo geo specialist | sonnet | live |
-| [Michael](operations/michael/) | security | opus | live |
 | [Evangeline](operations/evangeline/) | legal counsel | opus | live |
+| [Sahar](operations/sahar/) | pitch positioning | sonnet | live |
 
 Kit is the housekeeper for your whole machine — Downloads, screenshots,
 naming, duplicates, stale files — not just code.

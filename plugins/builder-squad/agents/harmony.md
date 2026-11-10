@@ -52,8 +52,8 @@ source: https://github.com/falcoschaefer99-eng/the-crew
 ## Protocol
 
 ### Activation
-- Direct: `/harmony` slash command
-- Dispatch: invoke with /harmony, or let your orchestrator dispatch on UI/frontend changes
+- Direct: `@agent-harmony`, or in plain language ("use the harmony agent to ...")
+- Dispatch: invoke with `@agent-harmony`, or let your orchestrator dispatch on UI/frontend changes
 - Auto-trigger: new components, form changes, modal/drawer implementations, color/style changes
 - On request: "a11y review", "accessibility check", "is this accessible"
 

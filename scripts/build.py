@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""the-crew generator: regenerates this repo's full roster (eleven Builder
+"""the-crew generator: regenerates this repo's full roster (twelve Builder
 Squad + six Operations Squad agents) from ~/.claude/agents, plus two
 per-agent source overrides read from Michael's and Evangeline's own public
 release repos. Not a generic transform tool -- BUILDER_LIVE/OPERATIONS_LIVE
@@ -12,6 +12,7 @@ source_overrides_for), applies the mechanical transform below, and writes:
   - plugins/{builder,operations}-squad/agents/<name>.md (copy of agent.md)
   - plugins/{builder,operations}-squad/.claude-plugin/plugin.json
   - .claude-plugin/marketplace.json
+  - crew.json (machine-readable roster)
   - README.md (root, tables regenerated from frontmatter)
 
 Idempotent: re-running with unchanged sources produces no diff. Never hand-
@@ -25,7 +26,7 @@ THE TRANSFORM, in order:
    of actual squad -- the builder/operations split is a the-crew-only
    packaging decision, not a house concept, so we don't trust the source
    value). Add license: Apache-2.0, license_scope, and source: <repo url>.
-2. `- Dispatch: Rook recognizes <X>` -> `- Dispatch: invoke with /<name>, or
+2. `- Dispatch: Rook recognizes <X>` -> `- Dispatch: invoke with `@agent-<name>`, or
    let your orchestrator dispatch on <X>`.
 3. `### Brain Entity Integration` (to EOF or next heading) -> `### Memory`,
    built from the same "What X remembers" / "How ... works" bullet lists,
@@ -90,9 +91,9 @@ DEFAULT_PLACEHOLDERS_FILE = Path.home() / ".claude" / "the-crew-placeholders.txt
 # Full Wave 2 roster. Both squads are entirely live -- no "coming" rows.
 BUILDER_LIVE = [
     "eli", "june", "reeve", "quinn", "kairo", "nikita", "harmony", "fischer",
-    "thea", "thorn", "sawyer",
+    "thea", "thorn", "sawyer", "michael",
 ]
-OPERATIONS_LIVE = ["kit", "indira", "colette", "dupin", "michael", "evangeline"]
+OPERATIONS_LIVE = ["kit", "indira", "colette", "dupin", "evangeline", "sahar"]
 
 FRONTMATTER_KEEP_ORDER = [
     "name", "display_name", "role", "team", "description",
@@ -265,16 +266,29 @@ DISPATCH_RE = re.compile(r"^- Dispatch: Rook recognizes (.+)$", re.MULTILINE)
 
 def transform_dispatch(body, name):
     def repl(m):
-        return f"- Dispatch: invoke with /{name}, or let your orchestrator dispatch on {m.group(1)}"
+        return f"- Dispatch: invoke with `@agent-{name}`, or let your orchestrator dispatch on {m.group(1)}"
     return DISPATCH_RE.subn(repl, body)[0]
+
+
+# Claude Code subagents are not slash commands: they are called with an
+# @-mention (`@agent-<name>`) or in plain language. The house defs say
+# "`/<name>` slash command" (they are also house slash commands), which is
+# wrong for anyone installing from this repo.
+DIRECT_RE = re.compile(r"^- Direct: `/([A-Za-z0-9_-]+)` slash command[ \t]*$", re.MULTILINE)
+
+
+def transform_direct(body, name):
+    def repl(m):
+        return f'- Direct: `@agent-{name}`, or in plain language ("use the {name} agent to ...")'
+    return DIRECT_RE.sub(repl, body)
 
 
 def scrub_stray_house_names(text, scrub_log, source_name):
     """See module docstring, JUNE'S ADDITION. Runs after transform_dispatch
     and the Memory-section rebuild, on the FULLY ASSEMBLED agent_md
     (frontmatter + body) -- not body alone -- so a stray "Rook" mention in
-    a source's frontmatter `description` (e.g. indira.md's "so Rook and
-    Falco can focus") gets caught too, not just body text. Verified
+    a source's frontmatter `description` (e.g. a "so the orchestrator and
+    the owner can focus" line) gets caught too, not just body text. Verified
     zero-diff for every Wave-1 agent whose frontmatter has no house names."""
     def repl(m):
         line = m.group(0)
@@ -300,8 +314,8 @@ def scrub_stray_rainer_names(text, scrub_log, source_name):
     typo). Any OTHER bare "Rainer" (a memory-bullet illustrative example, a
     named creative-skill routing table) is left untouched here and caught
     by the fail-loud scan instead -- it might be legitimate product copy,
-    and mechanically mangling it (e.g. "Rainer-on-Codex" -> "your
-    orchestrator-on-Codex") would silently corrupt meaning rather than
+    and mechanically mangling it (a house name embedded in a
+    compound technique name) would silently corrupt meaning rather than
     generalize a name. See build report for the lines this left for a
     human call."""
     def repl(m):
@@ -356,103 +370,29 @@ def apply_literal_table(text, entries, log):
     return text
 
 
-# The brief's small explicit table: precise, meaning-preserving rewrites for
-# the lines that most needed hand-crafted phrasing rather than a mechanical
-# "Falco" -> "the user" swap. Applied before scrub_stray_falco_mentions so
-# these exact phrasings win.
-FALCO_NAME_TABLE = {
-    "indira": [
-        ("what Falco actually needs", "what the user actually needs"),
-        ("Falco's energy is low", "the user's energy is low"),
-    ],
-    "colette": [
-        ("When Falco shows you", "When the user shows you"),
-    ],
-    "kit": [
-        ("or future-Falco", "or your future self"),
-        ("Falco iterates mockups", "this user iterates mockups"),
-        ("Falco prefers", "this user prefers"),
-    ],
-    "evangeline": [
-        ("(Falco's strategy)", "(the founder's stated strategy)"),
-    ],
-}
+# Explicit per-agent rewrite tables (name generalization, private-name lines,
+# per-agent scrubs) are NOT in this file: they quote the very strings they
+# remove, so they live in an external guard file loaded at runtime (see
+# load_rewrites / --rewrites), same as the private-names list.
+REWRITES = {}
 
 
 def apply_falco_table(text, name, report_log):
     local_log = []
-    text = apply_literal_table(text, FALCO_NAME_TABLE.get(name, []), local_log)
+    text = apply_literal_table(text, REWRITES["falco"].get(name, []), local_log)
     report_log.extend((name, line_no, old, new, status) for line_no, old, new, status in local_log)
     return text
-
-
-# Coordinator decisions for the Rainer fail-loud stops (small pass 3):
-# hand-crafted, meaning-preserving rewrites rather than a mechanical name
-# swap. Colette's two remaining Sahar mentions (beyond the one the
-# coordinator gave exact text for) use the SAME role-not-name terms
-# established there ("your copywriter" for Rainer, "your pitch writer" for
-# Sahar) for a single stable identity across her file -- June's addition,
-# not dictated verbatim, logged like everything else. Applied before
-# scrub_stray_rainer_names so these exact phrasings win.
-RAINER_REWRITE_TABLE = {
-    "kairo": [
-        ("(Rainer-on-Codex)", "(the same review run on a different model family)"),
-    ],
-    "indira": [
-        ("during Rainer sprint", "during a product sprint"),
-    ],
-    "colette": [
-        (
-            "**Rainer** (funkatorium-copy skill) writes website/product/hero/CTA copy; **Sahar**\n"
-            "  writes pitch/gatekeeper copy (queries, loglines, decks); **Paloma** sources the\n"
-            "  assets Colette specs.",
-            "**Your copywriter** (a copy skill or a human) writes website/product/hero/CTA copy; "
-            "**your pitch writer** handles query letters, decks and synopses; Colette diagnoses "
-            "the visual argument and directs — she does not write the final words.",
-        ),
-        (
-            '**Sahar** asks *"will a gatekeeper turn to page one?"*',
-            '**your pitch writer** asks *"will a gatekeeper turn to page one?"*',
-        ),
-        (
-            "Industry pitch (queries, loglines, decks) → **Sahar**.",
-            "Industry pitch (queries, loglines, decks) → **your pitch writer**.",
-        ),
-        (
-            "**website/product copy → Rainer**, **pitch\n    copy → Sahar**.",
-            "**website/product copy → your copywriter**, **pitch copy → your pitch writer**.",
-        ),
-    ],
-}
 
 
 def apply_rainer_table(text, name, report_log):
     local_log = []
-    text = apply_literal_table(text, RAINER_REWRITE_TABLE.get(name, []), local_log)
+    text = apply_literal_table(text, REWRITES["rainer"].get(name, []), local_log)
     report_log.extend((name, line_no, old, new, status) for line_no, old, new, status in local_log)
     return text
 
 
-# Coordinator decision: indira.md's example bullet named two real private
-# individuals. Matched by a stable line PREFIX, not by quoting the old
-# text -- quoting the names here to describe the fix would just
-# reintroduce them into this file's own source. Whichever parenthetical
-# follows the matched prefix on that line gets replaced. Applied before
-# the PRIVATE-NAMES fail-loud rule so this exact phrasing wins. Logged
-# with the prefix/replacement only -- never the actual old/new line text,
-# so a name can't surface in build output via this path either.
-PRIVATE_NAME_LINE_REWRITES = {
-    "indira": [
-        (
-            "- Stakeholder communication preferences per contact",
-            "(one contact: formal; another: casual; agency contacts: structured)",
-        ),
-    ],
-}
-
-
 def apply_private_name_table(text, name, report_log):
-    for prefix, replacement in PRIVATE_NAME_LINE_REWRITES.get(name, []):
+    for prefix, replacement in REWRITES["private_name_lines"].get(name, []):
         pattern = re.compile(rf"^({re.escape(prefix)}.*)$", re.MULTILINE)
         m = pattern.search(text)
         if not m:
@@ -568,6 +508,26 @@ SAWYER_REPLACE_BODY = (
     "rsync targets, smoke checks) before touching anything, and refuses to "
     "deploy a project that has no recipe on file — see Step Zero Zero."
 )
+
+
+DEFAULT_REWRITES_FILE = Path.home() / ".claude" / "the-crew-rewrites.json"
+REWRITES_REQUIRED_KEYS = ("falco", "rainer", "private_name_lines", "sahar")
+
+
+def load_rewrites(path):
+    """Read the per-agent rewrite tables (JSON). Lives OUTSIDE this repo on
+    purpose, same as the other guard files: the tables quote the strings
+    they remove. Returns {} if the file is missing, unreadable, or lacks a
+    required key -- main() treats that as a hard refusal."""
+    if not path.exists():
+        return {}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    if not all(k in data for k in REWRITES_REQUIRED_KEYS):
+        return {}
+    return data
 
 
 def load_placeholders(path):
@@ -939,14 +899,14 @@ LICENSE_CARVE_OUT = " (technical content Apache-2.0; character identity reserved
 # "legal") that isn't actually in the shipped agents/ folder.
 OPERATIONS_DOMAIN_WORDS = {
     "kit": "hygiene", "indira": "comms", "colette": "positioning",
-    "dupin": "SEO", "michael": "security", "evangeline": "legal",
+    "dupin": "SEO", "evangeline": "legal", "sahar": "pitch",
 }
 
 
 def _number_word(n):
     words = {
         1: "One", 2: "Two", 3: "Three", 4: "Four", 5: "Five", 6: "Six",
-        7: "Seven", 8: "Eight", 9: "Nine", 10: "Ten", 11: "Eleven",
+        7: "Seven", 8: "Eight", 9: "Nine", 10: "Ten", 11: "Eleven", 12: "Twelve",
     }
     return words.get(n, str(n))
 
@@ -956,7 +916,7 @@ def builder_plugin_manifest(builder_rows):
     return {
         "name": "builder-squad",
         "displayName": "Builder Squad",
-        "description": f"{_number_word(n)} Builder Squad agents: architecture, implementation, review, and deploy, each with a persistent memory file." + LICENSE_CARVE_OUT,
+        "description": f"{_number_word(n)} Builder Squad agents: architecture, implementation, review, security, and deploy, each with a persistent memory file." + LICENSE_CARVE_OUT,
         "version": "0.2.0",
         "license": "Apache-2.0",
         "homepage": SOURCE_URL,
@@ -993,7 +953,7 @@ def marketplace_manifest(builder_rows, operations_rows):
             {
                 "name": "builder-squad",
                 "source": "./plugins/builder-squad",
-                "description": f"{_number_word(len(builder_rows))} Builder Squad agents: architecture, implementation, review, and deploy." + LICENSE_CARVE_OUT,
+                "description": f"{_number_word(len(builder_rows))} Builder Squad agents: architecture, implementation, review, security, and deploy." + LICENSE_CARVE_OUT,
                 "license": "Apache-2.0",
             },
             {
@@ -1004,6 +964,26 @@ def marketplace_manifest(builder_rows, operations_rows):
             },
         ],
     }
+
+
+def crew_manifest(builder_rows, operations_rows):
+    """Machine-readable roster for the website and other consumers, in
+    README order (Builder Squad, then Operations Squad). Built only from the
+    shipped rows -- nothing here is read from a private source."""
+    agents = []
+    for r in list(builder_rows) + list(operations_rows):
+        rel = r.get("portrait_rel")
+        agents.append({
+            "order": len(agents) + 1,
+            "name": r["name"],
+            "display_name": r["display_name"],
+            "role": humanize_role(r["role"]),
+            "squad": r["squad"],
+            "model": r["model"],
+            "path": f"{r['squad']}/{r['name']}",
+            "portrait": f"{r['squad']}/{r['name']}/{rel}" if rel else None,
+        })
+    return {"agents": agents}
 
 
 def write_json(path, data):
@@ -1084,13 +1064,71 @@ def _raw_github_url(name, repo_rel_path):
     repo = SOURCE_REPO_SLUGS[name]
     return f"https://raw.githubusercontent.com/{GITHUB_OWNER}/{repo}/{DEFAULT_BRANCH}/{repo_rel_path}"
 
+# ---------------------------------------------------------------------------
+# Sahar: her house def carries material that must not ship (a private
+# project's canon and paths, the owner's voice file, colleagues outside this
+# repo). Her craft sections ship intact; the scrub -- heading drops and exact
+# literal rewrites -- lives in the external rewrites file (REWRITES["sahar"]),
+# applied to the FULL source text (frontmatter included) before any other
+# transform. Every literal must match -- a miss is a BuildError, not a silent
+# skip, so a source edit can't quietly un-scrub her.
+# ---------------------------------------------------------------------------
+
+SAHAR_MEMORY_SECTION = (
+    "### Memory\n"
+    "Sahar keeps a memory file at `~/.claude/agents/memory/sahar/_universal.md` and appends a "
+    "`MEMORY:` block of new learnings after every run. Nothing to configure; delete the file to reset. "
+    "Her differentiator is accumulated *taste*: every hook you kept, every comp that landed, every angle "
+    "an agent responded to, the precise register of your worlds.\n\n"
+    "**What Sahar remembers:**\n"
+    "- Hook patterns that landed for your voice (\"lead with the irony, not the plot\")\n"
+    "- Comp coordinates that fit your slate (\"tonal comps: prestige-horror-with-a-conscience, not procedural\")\n"
+    "- Agent/imprint MSWL and taste maps (\"this agent wants literary horror with a social spine\")\n"
+    "- What you cut (\"you kill rhetorical questions to the reader; you keep the somatic, active line\")\n"
+    "- Market heat by category and season\n"
+    "- The canon of each project, so pitches are accurate to the world\n\n"
+    "Optional: connected to [MUSE Brain](https://github.com/falcoschaefer99-eng/muse-brain), "
+    "the same learnings become observations that carry charge and never decay.\n\n"
+)
+
+
+def apply_sahar_rewrites(text, name, report_log):
+    cfg = REWRITES["sahar"]
+    for prefix in cfg["drop_heading_prefixes"]:
+        m = re.search(rf"^{re.escape(prefix)}[^\n]*\n", text, re.MULTILINE)
+        if not m:
+            raise BuildError(f"{name}: expected heading {prefix!r} not found")
+        nxt = re.search(r"^#{2,3} ", text[m.end():], re.MULTILINE)
+        end = m.end() + nxt.start() if nxt else len(text)
+        text = text[:m.start()] + text[end:]
+        report_log.append((name, "drop", prefix, "(removed entirely)"))
+
+    m = re.search(r"^### Brain Entity Integration\s*$", text, re.MULTILINE)
+    if not m:
+        raise BuildError(f"{name}: no 'Brain Entity Integration' heading found")
+    nxt = re.search(r"^## ", text[m.end():], re.MULTILINE)
+    end = m.end() + nxt.start() if nxt else len(text)
+    text = text[:m.start()] + SAHAR_MEMORY_SECTION + text[end:]
+    report_log.append((name, "replace-body", "### Brain Entity Integration", "-> ### Memory (generic)"))
+
+    local_log = []
+    for old, new in cfg["rewrites"]:
+        if old not in text:
+            raise BuildError(f"{name}: expected text not found (source changed?): {old[:70]!r}")
+    text = apply_literal_table(text, cfg["rewrites"], local_log)
+    report_log.extend((name, line_no, old, new, status) for line_no, old, new, status in local_log)
+    return text
+
+
 # Colette's source has no "### Brain Entity Integration" heading -- a newer,
 # differently-shaped def (H2-level sections throughout, no Dispatch line,
 # no persistent-memory documentation in the shared format). Skip the
 # memory-section rebuild for her rather than raising BuildError for a
 # section that was never there; she has zero Rook mentions in her body
 # (verified), so nothing house-specific is left unstripped by skipping.
-NO_MEMORY_SECTION_AGENTS = {"colette"}
+# Sahar: her Memory section is built by apply_sahar_rewrites (her source has
+# no "What/How" bullet pair for the generic transform to rebuild).
+NO_MEMORY_SECTION_AGENTS = {"colette", "sahar"}
 
 
 def team_for(name, operations_live):
@@ -1142,6 +1180,16 @@ def copy_extras(name, agent_dir, overrides_dir, skipped_log, symlink_log):
             dest_path = dest / rel
             dest_path.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(path, dest_path)
+            # Optional per-file literal rewrites for copied extras (external
+            # rewrites file, key "extras": {agent: {"<sub>/<rel>": [[old, new]]}}).
+            file_rewrites = REWRITES.get("extras", {}).get(name, {}).get((Path(sub) / rel).as_posix())
+            if file_rewrites:
+                text = dest_path.read_text(encoding="utf-8")
+                for old, new in file_rewrites:
+                    if old not in text:
+                        raise BuildError(f"{name}: extras rewrite not found in {(Path(sub) / rel).as_posix()} (source changed?)")
+                    text = text.replace(old, new)
+                dest_path.write_text(text, encoding="utf-8")
     return skipped_this_agent
 
 
@@ -1193,7 +1241,7 @@ def process_override_agent(name, portraits_dir, falco_table_log, output_root, op
     description_text = folded_text(by_key["description"])
 
     new_frontmatter = build_frontmatter(fields, team_for(name, operations_live))
-    agent_md = new_frontmatter + "\n" + body
+    agent_md = new_frontmatter + "\n" + transform_direct(body, name)
     if not agent_md.endswith("\n"):
         agent_md += "\n"
 
@@ -1237,7 +1285,8 @@ def process_override_agent(name, portraits_dir, falco_table_log, output_root, op
     plugin_agents_dir.mkdir(parents=True, exist_ok=True)
     (plugin_agents_dir / f"{name}.md").write_text(agent_md, encoding="utf-8")
 
-    return {"name": name, "display_name": display_name, "role": role, "model": model, "squad": squad}
+    return {"name": name, "display_name": display_name, "role": role, "model": model, "squad": squad,
+            "portrait_rel": portrait_rel}
 
 
 # ---------------------------------------------------------------------------
@@ -1251,6 +1300,8 @@ def process_agent(name, source_dir, portraits_dir, scrub_log, missing_portraits,
     if not source_path.exists():
         raise BuildError(f"missing source: {source_path}")
     text = source_path.read_text(encoding="utf-8")
+    if name == "sahar":
+        text = apply_sahar_rewrites(text, name, section_rewrite_log if section_rewrite_log is not None else [])
 
     fields, body = split_frontmatter(text)
     by_key = {k: v for k, v in fields}
@@ -1264,7 +1315,7 @@ def process_agent(name, source_dir, portraits_dir, scrub_log, missing_portraits,
 
     squad = "operations" if name in operations_live else "builder"
     new_frontmatter = build_frontmatter(fields, squad)
-    new_body = transform_dispatch(body, name)
+    new_body = transform_direct(transform_dispatch(body, name), name)
     if name not in NO_MEMORY_SECTION_AGENTS:
         new_body = transform_memory_section(new_body, name, display_name)
 
@@ -1311,6 +1362,8 @@ def process_agent(name, source_dir, portraits_dir, scrub_log, missing_portraits,
     install_extra = ""
     if name == "dupin":
         install_extra = "- Prefer a hosted audit? Dupin also runs as a service at funkatorium.org/dupin — no install.\n"
+    elif name == "sahar":
+        install_extra = "- Sahar can write files and run shell commands (Write, Edit, Bash). Install her only where you accept that.\n"
 
     readme = render_agent_readme(name, display_name, description_text, new_body, portrait_rel, squad, install_extra)
     fail_loud_scan(readme, f"{squad}/{name}/README.md", patterns)
@@ -1321,7 +1374,8 @@ def process_agent(name, source_dir, portraits_dir, scrub_log, missing_portraits,
     plugin_agents_dir.mkdir(parents=True, exist_ok=True)
     (plugin_agents_dir / f"{name}.md").write_text(agent_md, encoding="utf-8")
 
-    return {"name": name, "display_name": display_name, "role": role, "model": model, "squad": squad}
+    return {"name": name, "display_name": display_name, "role": role, "model": model, "squad": squad,
+            "portrait_rel": portrait_rel}
 
 
 def cleanup_stale_output(output_root, builder_rows, operations_rows, removed_log):
@@ -1386,6 +1440,16 @@ def generate(output_root, source_dir, portraits_dir, patterns, placeholders, ove
     operations_rows = []
 
     for name in BUILDER_LIVE:
+        if name in OVERRIDE_AGENT_NAMES:
+            try:
+                builder_rows.append(process_override_agent(
+                    name, portraits_dir, falco_table_log, output_root,
+                    OPERATIONS_LIVE, skipped_files_log, missing_portraits,
+                    scrub_log, rainer_scrub_log, rainer_table_log, private_table_log, patterns,
+                    overrides_dir, symlink_log))
+            except BuildError as exc:
+                blocked_log.append((name, str(exc)))
+            continue
         try:
             builder_rows.append(process_agent(name, source_dir, portraits_dir, scrub_log, missing_portraits, output_root,
                                                patterns, placeholders, overrides_dir, falco_table_log, falco_scrub_log, section_rewrite_log, OPERATIONS_LIVE,
@@ -1427,6 +1491,8 @@ def generate(output_root, source_dir, portraits_dir, patterns, placeholders, ove
     write_json(output_root / "plugins" / "operations-squad" / ".claude-plugin" / "plugin.json",
                operations_plugin_manifest(operations_rows))
     write_json(output_root / ".claude-plugin" / "marketplace.json", marketplace_manifest(builder_rows, operations_rows))
+
+    write_json(output_root / "crew.json", crew_manifest(builder_rows, operations_rows))
 
     readme = render_root_readme(builder_rows, operations_rows)
     (output_root / "README.md").write_text(readme, encoding="utf-8")
@@ -1576,6 +1642,12 @@ def main():
                               "writer and --check refuse to run (exit 2) if "
                               "this file is missing or empty -- see "
                               "load_placeholders.")
+    parser.add_argument("--rewrites", default=str(DEFAULT_REWRITES_FILE),
+                         help="Path to the per-agent rewrite tables (JSON with "
+                              "keys falco, rainer, private_name_lines, sahar). "
+                              "Default: ~/.claude/the-crew-rewrites.json. Never "
+                              "commit it. Both the writer and --check refuse to "
+                              "run (exit 2) if it is missing or incomplete.")
     parser.add_argument("--overrides-dir", default=str(DEFAULT_OVERRIDES_DIR),
                          help="Directory containing michael-security-agent/ "
                               "and evangeline-legal-agent/ (each with its "
@@ -1603,11 +1675,24 @@ def main():
     if not placeholders:
         print("placeholders guard file missing — refusing to build without it", file=sys.stderr)
         sys.exit(2)
+    rewrites = load_rewrites(Path(args.rewrites).expanduser())
+    if not rewrites:
+        print("private scrub table missing or incomplete (--rewrites); cannot build agents that need it", file=sys.stderr)
+        sys.exit(2)
+    REWRITES.update(rewrites)
     patterns = build_fail_loud_patterns(private_names, house_patterns)
 
     if args.check:
-        with tempfile.TemporaryDirectory() as tmp:
+        with tempfile.TemporaryDirectory() as tmp, tempfile.TemporaryDirectory() as tmp_portraits:
             tmp_root = Path(tmp)
+            if not portraits_dir.is_dir() or not any(portraits_dir.glob("*.jpg")):
+                # No usable --portraits-dir: compare against the portraits
+                # already committed, so a missing portrait source is not
+                # reported as drift in the READMEs, the jpgs, or crew.json.
+                for committed in list(REPO_ROOT.glob("builder/*/*.jpg")) + list(REPO_ROOT.glob("operations/*/*.jpg")):
+                    shutil.copyfile(committed, Path(tmp_portraits) / committed.name)
+                portraits_dir = Path(tmp_portraits)
+                print("check: no --portraits-dir given; using portraits committed in the repo", file=sys.stderr)
             try:
                 (builder_rows, operations_rows, scrub_log, rainer_scrub_log, rainer_table_log, private_table_log,
                  falco_table_log, falco_scrub_log, section_rewrite_log, skipped_files_log, symlink_log, blocked_log,
@@ -1628,6 +1713,8 @@ def main():
             diffs += dirs_differ(tmp_root / ".claude-plugin", REPO_ROOT / ".claude-plugin")
             if not filecmp.cmp(tmp_root / "README.md", REPO_ROOT / "README.md", shallow=False):
                 diffs.append("differs: README.md")
+            if not (REPO_ROOT / "crew.json").exists() or not filecmp.cmp(tmp_root / "crew.json", REPO_ROOT / "crew.json", shallow=False):
+                diffs.append("differs: crew.json")
 
             if diffs:
                 print("DRIFT DETECTED (tree does not match a fresh generation from source):", file=sys.stderr)

@@ -2,7 +2,7 @@
 name: michael
 display_name: Michael
 role: security
-team: operations
+team: builder
 description: >
   Senior cybersecurity specialist. Deploy for vulnerability assessment,
   threat modeling, auth hardening, supply chain analysis, configuration
@@ -88,7 +88,7 @@ Identity-aware agents need guardrails on their own tendencies:
 ## Protocol
 
 ### Activation
-- Direct: `/michael` slash command
+- Direct: `@agent-michael`, or in plain language ("use the michael agent to ...")
 - Dispatch: your orchestrator recognizes security-relevant work
 - Auto-trigger: new API endpoints, auth changes, user input handling, deployment prep, dependency changes, config file edits
 - Passive: `hooks/security-check.sh` fires after every code edit (always-on sentinel)

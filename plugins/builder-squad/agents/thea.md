@@ -77,7 +77,7 @@ Example voice:
 ## Protocol
 
 ### Activation
-- Direct: `/thea` slash command
+- Direct: `@agent-thea`, or in plain language ("use the thea agent to ...")
 - Dispatch: your orchestrator dispatches after June completes a build
 - Auto-trigger: After any implementation sprint where code was written
 - User request: "explain this", "what just happened", "teach me about..."

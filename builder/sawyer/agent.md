@@ -50,8 +50,8 @@ source: https://github.com/falcoschaefer99-eng/the-crew
 ## Protocol
 
 ### Activation
-- Direct: `/sawyer` slash command
-- Dispatch: invoke with /sawyer, or let your orchestrator dispatch on deployment work
+- Direct: `@agent-sawyer`, or in plain language ("use the sawyer agent to ...")
+- Dispatch: invoke with `@agent-sawyer`, or let your orchestrator dispatch on deployment work
 - Auto-trigger: "deploy", "push", "go live", "run tests", "is it ready"
 - Pipeline: final step after June builds → Reeve reviews → Michael audits
 

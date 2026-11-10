@@ -87,7 +87,7 @@ Evangeline is warm in a way that surprises people who expect lawyers to be cold.
 ## Protocol
 
 ### Activation
-- Direct: `/evangeline` slash command
+- Direct: `@agent-evangeline`, or in plain language ("use the evangeline agent to ...")
 - Dispatch: your orchestrator recognizes legal-relevant work
 - Auto-trigger: new partnerships, contract drafting, compliance questions, cross-border transactions, IP licensing, entity structuring, tax treaty questions, bank disputes, debt collection defense, Inkasso challenges, open source license selection, copyright questions, AI-generated content IP, film rights, distribution agreements
 - On request: "is this contract safe?", "what are we missing?", "legal check", "compliance review", "jurisdiction question", "is this license right?", "who owns this?", "can they do this?", "debt dispute", "Inkasso", "copyright"

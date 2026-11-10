@@ -1,0 +1,184 @@
+{
+  "agents": [
+    {
+      "order": 1,
+      "name": "eli",
+      "display_name": "Eli",
+      "role": "architect",
+      "squad": "builder",
+      "model": "opus",
+      "path": "builder/eli",
+      "portrait": "builder/eli/eli.jpg"
+    },
+    {
+      "order": 2,
+      "name": "june",
+      "display_name": "June",
+      "role": "engineer",
+      "squad": "builder",
+      "model": "sonnet",
+      "path": "builder/june",
+      "portrait": "builder/june/june.jpg"
+    },
+    {
+      "order": 3,
+      "name": "reeve",
+      "display_name": "Reeve",
+      "role": "code reviewer",
+      "squad": "builder",
+      "model": "sonnet",
+      "path": "builder/reeve",
+      "portrait": "builder/reeve/reeve.jpg"
+    },
+    {
+      "order": 4,
+      "name": "quinn",
+      "display_name": "Quinn",
+      "role": "performance reviewer",
+      "squad": "builder",
+      "model": "sonnet",
+      "path": "builder/quinn",
+      "portrait": "builder/quinn/quinn.jpg"
+    },
+    {
+      "order": 5,
+      "name": "kairo",
+      "display_name": "Kairo",
+      "role": "test reviewer",
+      "squad": "builder",
+      "model": "sonnet",
+      "path": "builder/kairo",
+      "portrait": "builder/kairo/kairo.jpg"
+    },
+    {
+      "order": 6,
+      "name": "nikita",
+      "display_name": "Nikita",
+      "role": "dependency reviewer",
+      "squad": "builder",
+      "model": "haiku",
+      "path": "builder/nikita",
+      "portrait": "builder/nikita/nikita.jpg"
+    },
+    {
+      "order": 7,
+      "name": "harmony",
+      "display_name": "Harmony",
+      "role": "accessibility reviewer",
+      "squad": "builder",
+      "model": "sonnet",
+      "path": "builder/harmony",
+      "portrait": "builder/harmony/harmony.jpg"
+    },
+    {
+      "order": 8,
+      "name": "fischer",
+      "display_name": "Fischer",
+      "role": "static reviewer",
+      "squad": "builder",
+      "model": "sonnet",
+      "path": "builder/fischer",
+      "portrait": "builder/fischer/fischer.jpg"
+    },
+    {
+      "order": 9,
+      "name": "thea",
+      "display_name": "Miss Thea",
+      "role": "mentor",
+      "squad": "builder",
+      "model": "haiku",
+      "path": "builder/thea",
+      "portrait": null
+    },
+    {
+      "order": 10,
+      "name": "thorn",
+      "display_name": "Thorn",
+      "role": "diagnostic surgeon",
+      "squad": "builder",
+      "model": "sonnet",
+      "path": "builder/thorn",
+      "portrait": "builder/thorn/thorn.jpg"
+    },
+    {
+      "order": 11,
+      "name": "sawyer",
+      "display_name": "Sawyer",
+      "role": "deploy",
+      "squad": "builder",
+      "model": "haiku",
+      "path": "builder/sawyer",
+      "portrait": "builder/sawyer/sawyer.jpg"
+    },
+    {
+      "order": 12,
+      "name": "michael",
+      "display_name": "Michael",
+      "role": "security",
+      "squad": "builder",
+      "model": "opus",
+      "path": "builder/michael",
+      "portrait": "builder/michael/assets/banner.png"
+    },
+    {
+      "order": 13,
+      "name": "kit",
+      "display_name": "Kit",
+      "role": "document management specialist",
+      "squad": "operations",
+      "model": "sonnet",
+      "path": "operations/kit",
+      "portrait": "operations/kit/kit.jpg"
+    },
+    {
+      "order": 14,
+      "name": "indira",
+      "display_name": "Indira",
+      "role": "chief of staff",
+      "squad": "operations",
+      "model": "sonnet",
+      "path": "operations/indira",
+      "portrait": null
+    },
+    {
+      "order": 15,
+      "name": "colette",
+      "display_name": "Colette",
+      "role": "visual market analyst",
+      "squad": "operations",
+      "model": "sonnet",
+      "path": "operations/colette",
+      "portrait": "operations/colette/colette.jpg"
+    },
+    {
+      "order": 16,
+      "name": "dupin",
+      "display_name": "Dupin",
+      "role": "seo geo specialist",
+      "squad": "operations",
+      "model": "sonnet",
+      "path": "operations/dupin",
+      "portrait": null
+    },
+    {
+      "order": 17,
+      "name": "evangeline",
+      "display_name": "Evangeline",
+      "role": "legal counsel",
+      "squad": "operations",
+      "model": "opus",
+      "path": "operations/evangeline",
+      "portrait": "operations/evangeline/assets/banner.png"
+    },
+    {
+      "order": 18,
+      "name": "sahar",
+      "display_name": "Sahar",
+      "role": "pitch positioning",
+      "squad": "operations",
+      "model": "sonnet",
+      "path": "operations/sahar",
+      "portrait": "operations/sahar/sahar.jpg"
+    }
+  ]
+}

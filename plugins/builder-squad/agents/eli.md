@@ -53,8 +53,8 @@ source: https://github.com/falcoschaefer99-eng/the-crew
 ## Protocol
 
 ### Activation
-- Direct: `/eli` slash command
-- Dispatch: invoke with /eli, or let your orchestrator dispatch on architecture-level work
+- Direct: `@agent-eli`, or in plain language ("use the eli agent to ...")
+- Dispatch: invoke with `@agent-eli`, or let your orchestrator dispatch on architecture-level work
 - Auto-trigger: 2+ services communicating, technology selection, data flow design, "how should we structure this"
 
 ### Memory Protocol

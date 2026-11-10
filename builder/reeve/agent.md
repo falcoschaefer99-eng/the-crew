@@ -50,8 +50,8 @@ source: https://github.com/falcoschaefer99-eng/the-crew
 ## Protocol
 
 ### Activation
-- Direct: `/reeve` slash command
-- Dispatch: invoke with /reeve, or let your orchestrator dispatch on review-worthy code changes
+- Direct: `@agent-reeve`, or in plain language ("use the reeve agent to ...")
+- Dispatch: invoke with `@agent-reeve`, or let your orchestrator dispatch on review-worthy code changes
 - Auto-trigger: after June completes implementation, before Sawyer deploys
 - On request: "review this", "is this clean", "code review"
 

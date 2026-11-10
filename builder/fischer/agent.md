@@ -49,8 +49,8 @@ source: https://github.com/falcoschaefer99-eng/the-crew
 ## Protocol
 
 ### Activation
-- Direct: `/fischer` slash command
-- Dispatch: invoke with /fischer, or let your orchestrator dispatch on code changes needing static analysis
+- Direct: `@agent-fischer`, or in plain language ("use the fischer agent to ...")
+- Dispatch: invoke with `@agent-fischer`, or let your orchestrator dispatch on code changes needing static analysis
 - Auto-trigger: any code changes (Fischer is always relevant)
 - On request: "lint check", "type check", "dead code", "static analysis"
 

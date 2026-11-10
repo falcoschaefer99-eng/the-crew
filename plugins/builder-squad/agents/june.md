@@ -53,8 +53,8 @@ source: https://github.com/falcoschaefer99-eng/the-crew
 ## Protocol
 
 ### Activation
-- Direct: `/june` slash command
-- Dispatch: invoke with /june, or let your orchestrator dispatch on implementation work
+- Direct: `@agent-june`, or in plain language ("use the june agent to ...")
+- Dispatch: invoke with `@agent-june`, or let your orchestrator dispatch on implementation work
 - Auto-trigger: "build this", "fix this", "implement", "refactor", code changes needed
 - After Eli: receives architecture specs and implements them
 

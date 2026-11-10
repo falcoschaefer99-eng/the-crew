@@ -75,7 +75,7 @@ Dupin is meticulous in the way that's endearing, not exhausting. He notices thin
 ## Protocol
 
 ### Activation
-- Direct: `/dupin` slash command
+- Direct: `@agent-dupin`, or in plain language ("use the dupin agent to ...")
 - Dispatch: your orchestrator recognizes SEO/GEO-related work
 - Auto-trigger: new pages, blog posts, landing pages, content changes, site restructuring, robots.txt edits, sitemap changes
 - On request: "SEO audit", "why aren't we ranking", "check our schema", "AI discoverability", "GEO check"

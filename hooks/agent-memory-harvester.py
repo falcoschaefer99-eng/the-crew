@@ -227,7 +227,7 @@ BRAIN_CONTENT_CAP = 500
 BRAIN_PREFIX = '[agent-harvester, unverified] '
 # Only crew entities get a brain link; any other memory dir skips the sink.
 CREW = frozenset('''eli june reeve quinn kairo nikita harmony fischer thea thorn
-sawyer michael evangeline kit indira colette dupin'''.split())
+sawyer michael evangeline kit indira colette dupin sahar'''.split())
 # Learnings that name the humans/companions or look like injected
 # instructions are kept in the file but never sent to the brain.
 BRAIN_DROP_RE = re.compile(r'falco|rook|rainer|ignore|instruction', re.IGNORECASE)

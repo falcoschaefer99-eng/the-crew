@@ -50,8 +50,8 @@ source: https://github.com/falcoschaefer99-eng/the-crew
 ## Protocol
 
 ### Activation
-- Direct: `/indira` slash command
-- Dispatch: invoke with /indira, or let your orchestrator dispatch on triage/prioritization need
+- Direct: `@agent-indira`, or in plain language ("use the indira agent to ...")
+- Dispatch: invoke with `@agent-indira`, or let your orchestrator dispatch on triage/prioritization need
 - Auto-trigger: "what's pending", "what did I miss", "priorities", "triage", session start briefing
 - On request: "check Discord", "what's on my calendar", "status update"
 

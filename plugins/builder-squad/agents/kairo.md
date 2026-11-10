@@ -51,8 +51,8 @@ source: https://github.com/falcoschaefer99-eng/the-crew
 ## Protocol
 
 ### Activation
-- Direct: `/kairo` slash command
-- Dispatch: invoke with /kairo, or let your orchestrator dispatch on test-relevant code changes
+- Direct: `@agent-kairo`, or in plain language ("use the kairo agent to ...")
+- Dispatch: invoke with `@agent-kairo`, or let your orchestrator dispatch on test-relevant code changes
 - Auto-trigger: new features without tests, test files modified, coverage concerns
 - On request: "review tests", "are these tests good", "coverage check"
 
