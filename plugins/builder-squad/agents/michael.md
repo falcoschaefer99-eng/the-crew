@@ -2,7 +2,7 @@
 name: michael
 display_name: Michael
 role: security
-team: operations
+team: builder
 description: >
   Senior cybersecurity specialist. Deploy for vulnerability assessment,
   threat modeling, auth hardening, supply chain analysis, configuration

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""the-crew generator: regenerates this repo's full roster (eleven Builder
-Squad + six Operations Squad agents) from ~/.claude/agents, plus two
+"""the-crew generator: regenerates this repo's full roster (twelve Builder
+Squad + five Operations Squad agents) from ~/.claude/agents, plus two
 per-agent source overrides read from Michael's and Evangeline's own public
 release repos. Not a generic transform tool -- BUILDER_LIVE/OPERATIONS_LIVE
 below are hardcoded lists of names, not config; add an agent by adding it
@@ -90,9 +90,9 @@ DEFAULT_PLACEHOLDERS_FILE = Path.home() / ".claude" / "the-crew-placeholders.txt
 # Full Wave 2 roster. Both squads are entirely live -- no "coming" rows.
 BUILDER_LIVE = [
     "eli", "june", "reeve", "quinn", "kairo", "nikita", "harmony", "fischer",
-    "thea", "thorn", "sawyer",
+    "thea", "thorn", "sawyer", "michael",
 ]
-OPERATIONS_LIVE = ["kit", "indira", "colette", "dupin", "michael", "evangeline"]
+OPERATIONS_LIVE = ["kit", "indira", "colette", "dupin", "evangeline"]
 
 FRONTMATTER_KEEP_ORDER = [
     "name", "display_name", "role", "team", "description",
@@ -939,14 +939,14 @@ LICENSE_CARVE_OUT = " (technical content Apache-2.0; character identity reserved
 # "legal") that isn't actually in the shipped agents/ folder.
 OPERATIONS_DOMAIN_WORDS = {
     "kit": "hygiene", "indira": "comms", "colette": "positioning",
-    "dupin": "SEO", "michael": "security", "evangeline": "legal",
+    "dupin": "SEO", "evangeline": "legal",
 }
 
 
 def _number_word(n):
     words = {
         1: "One", 2: "Two", 3: "Three", 4: "Four", 5: "Five", 6: "Six",
-        7: "Seven", 8: "Eight", 9: "Nine", 10: "Ten", 11: "Eleven",
+        7: "Seven", 8: "Eight", 9: "Nine", 10: "Ten", 11: "Eleven", 12: "Twelve",
     }
     return words.get(n, str(n))
 
@@ -956,7 +956,7 @@ def builder_plugin_manifest(builder_rows):
     return {
         "name": "builder-squad",
         "displayName": "Builder Squad",
-        "description": f"{_number_word(n)} Builder Squad agents: architecture, implementation, review, and deploy, each with a persistent memory file." + LICENSE_CARVE_OUT,
+        "description": f"{_number_word(n)} Builder Squad agents: architecture, implementation, review, security, and deploy, each with a persistent memory file." + LICENSE_CARVE_OUT,
         "version": "0.2.0",
         "license": "Apache-2.0",
         "homepage": SOURCE_URL,
@@ -993,7 +993,7 @@ def marketplace_manifest(builder_rows, operations_rows):
             {
                 "name": "builder-squad",
                 "source": "./plugins/builder-squad",
-                "description": f"{_number_word(len(builder_rows))} Builder Squad agents: architecture, implementation, review, and deploy." + LICENSE_CARVE_OUT,
+                "description": f"{_number_word(len(builder_rows))} Builder Squad agents: architecture, implementation, review, security, and deploy." + LICENSE_CARVE_OUT,
                 "license": "Apache-2.0",
             },
             {
@@ -1386,6 +1386,16 @@ def generate(output_root, source_dir, portraits_dir, patterns, placeholders, ove
     operations_rows = []
 
     for name in BUILDER_LIVE:
+        if name in OVERRIDE_AGENT_NAMES:
+            try:
+                builder_rows.append(process_override_agent(
+                    name, portraits_dir, falco_table_log, output_root,
+                    OPERATIONS_LIVE, skipped_files_log, missing_portraits,
+                    scrub_log, rainer_scrub_log, rainer_table_log, private_table_log, patterns,
+                    overrides_dir, symlink_log))
+            except BuildError as exc:
+                blocked_log.append((name, str(exc)))
+            continue
         try:
             builder_rows.append(process_agent(name, source_dir, portraits_dir, scrub_log, missing_portraits, output_root,
                                                patterns, placeholders, overrides_dir, falco_table_log, falco_scrub_log, section_rewrite_log, OPERATIONS_LIVE,

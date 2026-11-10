@@ -47,7 +47,7 @@ Register Michael's harvester in `~/.claude/settings.json` and set `AGENT_MEMORY_
         "hooks": [
           {
             "type": "command",
-            "command": "AGENT_MEMORY_AUTOPUSH=1 python3 /Users/YOU/.claude/hooks/agent-memory-harvester.py",
+            "command": "AGENT_MEMORY_AUTOPUSH=1 python3 ~/.claude/hooks/agent-memory-harvester.py",
             "timeout": 20
           }
         ]

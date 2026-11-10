@@ -1,7 +1,7 @@
 {
   "name": "builder-squad",
   "displayName": "Builder Squad",
-  "description": "Eleven Builder Squad agents: architecture, implementation, review, and deploy, each with a persistent memory file. (technical content Apache-2.0; character identity reserved \u2014 see NOTICE)",
+  "description": "Twelve Builder Squad agents: architecture, implementation, review, security, and deploy, each with a persistent memory file. (technical content Apache-2.0; character identity reserved \u2014 see NOTICE)",
   "version": "0.2.0",
   "license": "Apache-2.0",
   "homepage": "https://github.com/falcoschaefer99-eng/the-crew",
